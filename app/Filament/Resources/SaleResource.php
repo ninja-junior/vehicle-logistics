@@ -40,7 +40,7 @@ class SaleResource extends Resource
                         ->relationship('stock','stock_vin')
                         ->searchable()
                         ->getSearchResultsUsing(fn (string $search)
-                            => Stock::getStocksWithRoDate($search)->pluck('stock_vin', 'id')),
+                            => Stock::getStocksWithoutSales($search)->pluck('stock_vin', 'id')),
                     Forms\Components\select::make('customer_id')
                         ->required()
                         ->label('Search customer using identification')
@@ -131,6 +131,7 @@ class SaleResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

@@ -347,12 +347,6 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Import is created.');
   
   
-        \App\Models\Item::factory()->create([
-            'import_id'=>1,
-            'stock_id'=>1
-        ]);
-        $this->command->info('Import Item is created.');
-
         \App\Models\Customs::factory()->create([
             'vendor_id'=>1,
             'ro_number'=>'100012300',

@@ -54,6 +54,10 @@ class Stock extends Model
     {
         return $this->hasMany(Sale::class);
     }
+    public function registrations():HasMany
+    {
+        return $this->hasMany(Registration::class);
+    }
 
     protected $appends = ['stock_vin']; // Add the virtual field to the model
 
@@ -75,7 +79,7 @@ class Stock extends Model
             ->when($search, function ($query, $search) {
                 $query->where('stock_vin', 'like', "%{$search}%");
             })
-            ->pluck('stock_vin', 'id');
+            ->get();
     }
 
     public static function getStocksWithRoDate($searchQuery = null)
@@ -92,14 +96,36 @@ class Stock extends Model
     }
     public static function getStocksWithoutSales($searchQuery = null)
     {
-        $query = self::getStocksWithRoDate($searchQuery)
-            ->whereNotIn('id', function($subquery) {
-                $subquery->select('stock_id')
-                    ->from('sales');
-            });
-    
+        $query = self::whereHas('items', function ($query) {
+            $query->whereNotNull('customs_id');
+        })->whereNotIn('id', function($subquery) {
+            $subquery->select('stock_id')
+                ->from('sales');
+        });
+        
+        if ($searchQuery) {
+            $query->where('stock_vin', 'LIKE', '%' . $searchQuery . '%');
+        }
+        
         return $query->get();
     }
+
+    public static function getStocksWithoutRegisteration($searchQuery = null)
+    {
+        $query = self::whereHas('items', function ($query) {
+            $query->whereNotNull('customs_id');
+        })->whereNotIn('id', function($subquery) {
+            $subquery->select('stock_id')
+                ->from('registrations');
+        });
+        
+        if ($searchQuery) {
+            $query->where('stock_vin', 'LIKE', '%' . $searchQuery . '%');
+        }
+        
+        return $query->get();
+    }
+
     public static function getModellName($id): ?Modell
     {
         return Stock::findOrFail($id)->modell;

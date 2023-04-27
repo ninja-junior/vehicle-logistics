@@ -8,7 +8,7 @@ use Filament\Widgets\BarChartWidget;
 
 class ImportedUnitsChart extends BarChartWidget
 {
-    protected static ?string $heading = 'Imported Units by Brand';
+    protected static ?string $heading = 'Imported & Non-Imported Units by Brand';
     protected static ?int $sort = 1;
     
     protected function getData(): array

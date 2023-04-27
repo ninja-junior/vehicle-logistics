@@ -42,7 +42,7 @@ class RegistrationResource extends Resource
                             ->label('Chassis Number')
                             ->relationship('stock','stock_vin')
                             ->searchable()
-                            ->getSearchResultsUsing(fn (string $search) => Stock::getStocksWithRoDate($search)->pluck('stock_vin', 'id'))
+                            ->getSearchResultsUsing(fn (string $search) => Stock::getStocksWithoutRegisteration($search)->pluck('stock_vin', 'id'))
                             ,
                         Forms\Components\TextInput::make('register_name')
                             ->maxLength(255),

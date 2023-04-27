@@ -2,23 +2,24 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Brand;
-use App\Models\Sale;
-use App\Models\Stock;
 use Carbon\Carbon;
+use App\Models\Sale;
+use App\Models\Brand;
+use App\Models\Stock;
+use App\Models\Registration;
 use Filament\Widgets\BarChartWidget;
 
-class UnitsSoldChart extends BarChartWidget
+class UnitsRegisterationChart extends BarChartWidget
 {
-    protected static ?string $heading = 'Units Sold by Brand';
-    protected static ?int $sort = 1;
+    protected static ?string $heading = 'Units Registeration by Brand';
+    protected static ?int $sort = 4;
 
     protected function getData(): array
     {
         $brands = Brand::select('brands.code')->get()->pluck('code')->toArray();
-        $start = Carbon::now()->subMonth(6)->startOfDay();
+        $start = Carbon::now()->subMonth(12)->startOfDay();
         $end = Carbon::now()->endOfDay();
-    
+
         $datasets = [];
         $colors = [
             'rgba(255, 99, 132, 0.5)',
@@ -32,17 +33,17 @@ class UnitsSoldChart extends BarChartWidget
         foreach ($brands as $brand) {
             $soldData = [];
             $dates = [];
-    
+
             $stocks = Stock::where('brand_id', Brand::where('code', $brand)->firstOrFail()->id)->get();
             foreach ($stocks as $stock) {
-                $soldCount = Sale::where('stock_id', $stock->id)
+                $soldCount = Registration::where('stock_id', $stock->id)
                     ->whereBetween('created_at', [$start, $end])
                     ->count();
-    
+
                 array_push($soldData, $soldCount);
                 array_push($dates, $stock->created_at->format('M j'));
-            }
-    
+            }   
+
             array_push($datasets, [
                 'label' => $brand,
                 'data' => $soldData,
@@ -53,11 +54,10 @@ class UnitsSoldChart extends BarChartWidget
             ]);
             $i++;
         }
-    
+
         return [
             'datasets' => $datasets,
             'labels' => $dates,
         ];
     }
-
 }

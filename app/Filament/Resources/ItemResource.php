@@ -61,7 +61,7 @@ class ItemResource extends Resource
                             ->required()
                             ->relationship('stock','stock_vin')
                             ->searchable()
-                            ->getSearchResultsUsing(fn (string $search) => Stock::getVinsNotInItemsAndNotInMyanmar($search))
+                            ->getSearchResultsUsing(fn (string $search) => Stock::getVinsNotInItemsAndNotInMyanmar($search)->pluck('stock_vin','id'))
                             ->reactive()
                             ->afterStateUpdated(function (Closure $set, $state){
                                 $set('model_name', Stock::getModellName($state)                                 
@@ -181,17 +181,33 @@ class ItemResource extends Resource
                                         ->label('Estimated Arrival')
                                         ->after('etd'),
                                         Forms\Components\Select::make('pol_id')                            
-                                        ->label('Port of Loading')
+                                        ->label('Port of Loading')                                        
                                         ->relationship('pol','full_location')
+                                        ->different('pod_id')
                                         ->searchable()                                        
                                         ->getSearchResultsUsing(fn (string $search) 
-                                        => Location::where('code', 'like', "%{$search}%")->pluck('full_location', 'id')),
+                                        => Location::where(
+                                            [
+                                                ['city', 'like', "%{$search}%"],
+                                                ['type','=','port']
+                                            ]
+            
+                                            )->pluck('full_location', 'id'))
+                                        ,
                                     Forms\Components\Select::make('pod_id')
                                         ->label('Port of Discharged')
                                         ->relationship('pod','full_location')
+                                        ->different('pol_id')
                                         ->searchable()
                                         ->getSearchResultsUsing(fn (string $search) 
-                                        => Location::where('code', 'like', "%{$search}%")->pluck('full_location', 'id')),  
+                                        => Location::where(
+                                            [
+                                                ['city', 'like', "%{$search}%"],
+                                                ['type','=','port']
+                                            ]
+            
+                                            )->pluck('full_location', 'id'))
+                                        ,  
                                    
                                     ])->columns(2)
                                 ])                                 
@@ -248,8 +264,10 @@ class ItemResource extends Resource
                                         ->label('Release Order Number')
                                         ->required()
                                         ->maxLength(20),
-                                    Forms\Components\DatePicker::make('started_at'),
-                                    Forms\Components\DatePicker::make('ro_date'),
+                                    Forms\Components\DatePicker::make('started_at')
+                                    ->before('ro_date'),
+                                    Forms\Components\DatePicker::make('ro_date')
+                                    ->after('started_at'),
                                     Forms\Components\TextInput::make('currency')
                                         ->default(Str::upper('usd'))
                                         ->maxLength(10),

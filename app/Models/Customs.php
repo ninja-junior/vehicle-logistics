@@ -12,7 +12,7 @@ class Customs extends Model
 {
     use HasFactory;
 
-    protected $fillable=['vendor_id','ro_number','start_at','ro_date','currency','ex_rate','total_taxes'];
+    protected $fillable=['vendor_id','ro_number','started_at','ro_date','currency','ex_rate','total_taxes'];
 
     public function items():HasMany
     {
